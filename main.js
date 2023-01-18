@@ -38,15 +38,12 @@ wss.on('connection', (ws, req) => {
         state: {}
     });
 
-    if (rooms[room]) {
-        rooms[room].push(ws);
-    } else {
+    if (!rooms[room]) {
         rooms.push([]);
     }
+    rooms[room].push(ws);
 
-    if (rooms[currentRoom].length > 1) {
-        broadcastNewState(currentRoom, clientId, {});
-    }
+    broadcastNewState(currentRoom, clientId, {});
 
     ws.on('message', (stateAsString) => {
         const sender = clients.get(ws);
