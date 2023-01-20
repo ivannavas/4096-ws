@@ -5,15 +5,15 @@ const wss = new WebSocketServer({ port: 8000 });
 const clients = new Map();
 const rooms = [];
 let currentRoom = 0;
-let currentRoomPlayers = 0;
 const roomLimit = 16;
 
 const getRoom = () => {
+    const currentRoomPlayers = rooms[currentRoom] ? rooms[currentRoom].length : 0;
     if (currentRoomPlayers >= roomLimit) {
+        if (currentRoom >= 999999999999999) {
+            currentRoom = -1;
+        }
         currentRoom++;
-        currentRoomPlayers = 1;
-    } else {
-        currentRoomPlayers++;
     }
     return currentRoom;
 };
@@ -49,5 +49,9 @@ wss.on('connection', (ws, req) => {
         const sender = clients.get(ws);
         sender.state = JSON.parse(stateAsString);
         broadcastNewState(sender.room, sender.id, sender.state);
+    });
+
+    ws.on('close', () => {
+        rooms[clients.get(ws).room] = rooms[clients.get(ws).room].filter(i => clients.get(i).id != clients.get(ws).id);
     });
 });
