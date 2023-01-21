@@ -5,7 +5,7 @@ const wss = new WebSocketServer({ port: 8000 });
 const clients = new Map();
 const rooms = [];
 let currentRoom = 0;
-const roomLimit = 16;
+const roomLimit = 9;
 
 const getRoom = () => {
     const currentRoomPlayers = rooms[currentRoom] ? rooms[currentRoom].length : 0;
