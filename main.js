@@ -51,7 +51,7 @@ wss.on('connection', (ws, req) => {
         broadcastNewState(sender.room, sender.id, sender.state);
     });
 
-    ws.on('close', () => {
-        rooms[clients.get(ws).room] = rooms[clients.get(ws).room].filter(i => clients.get(i).id != clients.get(ws).id);
-    });
+    // ws.on('close', () => {
+    //     rooms[clients.get(ws).room] = rooms[clients.get(ws).room].filter(i => clients.get(i).id != clients.get(ws).id);
+    // });
 });
