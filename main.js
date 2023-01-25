@@ -25,6 +25,33 @@ const broadcastNewState = (room, id, state) => {
         }));
     });
 };
+const isGameLost = (cells) => {
+    let currentCol = 0;
+    let currentRow = 0;
+    let previousValue = null;
+    if (cells) {
+        for (let i = 0; i < cells.length; i++) {
+            const column = cells[i];
+            for (let j = 0; j < column.length; j++) {
+                const cell = column[j];
+                if (!cell) {
+                    return false;
+                }
+                const value = cell.value;
+                if ((previousValue != null && value == previousValue) || (cells[currentCol + 1] && cells[currentCol + 1][currentRow] && value == cells[currentCol + 1][currentRow].value) || (cells[currentCol - 1] && cells[currentCol - 1][currentRow] && value == cells[currentCol - 1][currentRow].value)) {
+                    return false;
+                }
+                previousValue = value;
+                currentRow++;
+            }
+            previousValue = null;
+            currentRow = 0;
+            currentCol++;
+        }
+        return true;
+    }
+    return false;
+}
 
 wss.on('connection', (ws, req) => {
     const clientId = uuidv4();
@@ -35,6 +62,7 @@ wss.on('connection', (ws, req) => {
     clients.set(ws, {
         id: clientId,
         room: room,
+        lost: false,
         state: {}
     });
 
@@ -47,7 +75,11 @@ wss.on('connection', (ws, req) => {
 
     ws.on('message', (stateAsString) => {
         const sender = clients.get(ws);
-        sender.state = JSON.parse(stateAsString);
+        const state = JSON.parse(stateAsString);
+        sender.state = state;
+        if (isGameLost(state.cells)) {
+            sender.state = null;
+        }
         broadcastNewState(sender.room, sender.id, sender.state);
     });
 
